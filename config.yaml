@@ -1,0 +1,14 @@
+genes:
+  - H2AFX      # H2A.X
+  - H2AFY      # macroH2A.1  
+  - H2AFY2     # macroH2A.2
+  - H2AFZ      # H2A.Z
+
+cancer_types:
+  - BRCA       
+  #add other cancer types
+
+analysis_parameters:
+  log2fc_threshold: 1.0
+  pvalue_threshold: 0.05
+  min_samples: 10
