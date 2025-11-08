@@ -13,6 +13,9 @@ analysis_parameters:
   pvalue_threshold: 0.05
   min_samples: 10
 
+tools:
+- GEPIA2: http://gepia.cancer-pku.cn/detail.php?gene=$genename&tag=$tagname
+
 datasets:
   TCGA:
     api_base: "https://api.gdc.cancer.gov"
