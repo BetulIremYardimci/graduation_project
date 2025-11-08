@@ -12,3 +12,15 @@ analysis_parameters:
   log2fc_threshold: 1.0
   pvalue_threshold: 0.05
   min_samples: 10
+
+datasets:
+  TCGA:
+    api_base: "https://api.gdc.cancer.gov"
+    endpoints:
+      files: "/files"          
+      cases: "/cases"          # clinical infos
+      projects: "/projects"
+    
+  recount3:
+    base_url: "http://duffel.rail.bio/recount3"
+    data_path: "/human/data_sources/tcga/gene_sums"
