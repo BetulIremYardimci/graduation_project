@@ -1,5 +1,66 @@
-gene_mapping:
-  H2AFX: H2AX
-  H2AFY: MACROH2A1
-  H2AFY2: MACROH2A2
-  H2AFZ: H2AZ1
+# Pan-Cancer Histone Variant Analysis Configuration
+
+# Cancer types for pan-cancer analysis (15 major types)
+cancer_types:
+  - BRCA   # Breast invasive carcinoma
+  - LUAD   # Lung adenocarcinoma
+  - LUSC   # Lung squamous cell carcinoma
+  - PRAD   # Prostate adenocarcinoma
+  - COAD   # Colon adenocarcinoma
+  - STAD   # Stomach adenocarcinoma
+  - LIHC   # Liver hepatocellular carcinoma
+  - HNSC   # Head and neck squamous cell carcinoma
+  - KIRC   # Kidney renal clear cell carcinoma
+  - THCA   # Thyroid carcinoma
+  - OV     # Ovarian serous cystadenocarcinoma
+  - UCEC   # Uterine corpus endometrial carcinoma
+  - BLCA   # Bladder urothelial carcinoma
+  - ESCA   # Esophageal carcinoma
+  - PAAD   # Pancreatic adenocarcinoma
+
+genes:
+  target_genes:
+    - H2AFX      # H2A.X (DNA damage response)
+    - H2AFY      # macroH2A.1 (transcriptional repression)
+    - H2AFY2     # macroH2A.2 (X-inactivation)
+    - H2AFZ      # H2A.Z (transcriptional activation)
+  
+  tcga_gene_names:
+    H2AFX: H2AX
+    H2AFY: MACROH2A1
+    H2AFY2: MACROH2A2
+    H2AFZ: H2AZ1
+
+analysis:
+  use_full_dataset: true          # false for testing with sample subset
+  test_sample_size: 100           # number of samples for testing mode
+  
+  # Statistical thresholds
+  padj_threshold: 0.05            # adjusted p-value cutoff
+  log2fc_threshold: 1.0           # log2 fold change cutoff
+  survival_pvalue_threshold: 0.05 # survival analysis p-value cutoff
+  
+  # Methods
+  differential_expression_method: "DESeq2"  # DESeq2, edgeR, or limma
+  multiple_testing_correction: "BH"         # BH (Benjamini-Hochberg), bonferroni, or qvalue
+  
+  # Output options
+  create_plots: true
+  save_intermediate_results: true
+  plot_format: "pdf"              # pdf, png, or both
+  plot_dpi: 300
+
+# Output directories
+output:
+  base_dir: "results"
+  differential_expression: "results/differential_expression"
+  survival: "results/survival"
+  figures: "results/figures"
+  tables: "results/tables"
+
+# Project metadata
+project:
+  name: "Pan-Cancer Histone Variant Analysis"
+  description: "Comparative analysis of histone variant expression and prognostic value across 15 major cancer types"
+  timeline: "1-2 months"
+  data_source: "TCGA via Genomic Data Commons (GDC)"
