@@ -1,57 +1,26 @@
+#!/usr/bin/env Rscript
 
-#import libraries
 library(TCGAbiolinks)
-library(DESeq2)
-library(survival)
-library(survminer)
 
-# LOAD TCGA DATASET
-query_small <- GDCquery(
-  project = "TCGA-BRCA",
-  data.category = "Transcriptome Profiling",
-  data.type = "Gene Expression Quantification",
-  workflow.type = "STAR - Counts",
-  sample.type = c("Primary Tumor", "Solid Tissue Normal"),
-  barcode = results$cases[1:100]
-)
+# Load functions
+source("lib/tcga_dataset_extraction.R")
+source("lib/differential_expression.R")
+source("lib/visualization.R")
 
-GDCdownload(query_small)
+# 1. Download data
+cat("Downloading TCGA data...\n")
+query <- download_tcga_data(cancer_type = "BRCA")
 
-results <- getResults(query_small)
+# 2. Prepare data
+cat("Preparing data...\n")
+data <- prepare_tcga_data(query)
 
-#ALL DATASETS
-#query_full <- GDCquery(
-#  project = "TCGA-BRCA",
-#  data.category = "Transcriptome Profiling",
-#  data.type = "Gene Expression Quantification",
-#  workflow.type = "STAR - Counts",
-#  sample.type = c("Primary Tumor", "Solid Tissue Normal")
-#)
+# 3. Run differential expression
+cat("Running differential expression analysis...\n")
+results <- run_differential_expression(data)
 
-#GDCdownload(query_full)
+# 4. Visualize
+cat("Creating plots...\n")
+create_plots(data, results)
 
-
-# DATA PREPERATION
-
-genes_tcga <- c("H2AX", "MACROH2A1", "MACROH2A2", "H2AZ1")
-gene_indices <- which(rowData(data)$gene_name %in% genes_tcga)
-gene_indices
-
-gene_data <- data[gene_indices, ]
-dim(gene_data)
-rowData(gene_data)$gene_name
-
-head(assay(gene_data, "unstranded"))
-
-#count matrix
-counts <- assay(gene_data, "unstranded")
-
-#get sample infos
-colData <- colData(gene_data)
-table(colData$sample_type)
-
-#DESeq2 Analysis
-dds <- DESeqDataSet(gene_data, design = ~ sample_type)
-dds <- DESeq(dds)
-results_deseq <- results(dds, contrast = c("sample_type", "Primary Tumor", "Solid Tissue Normal"))
-results_deseq
+cat("Analysis complete!\n")

@@ -3,7 +3,3 @@ gene_mapping:
   H2AFY: MACROH2A1
   H2AFY2: MACROH2A2
   H2AFZ: H2AZ1
-
-cancer_types:
-  - BRCA       
-  #add other cancer types
