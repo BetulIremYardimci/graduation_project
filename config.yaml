@@ -31,6 +31,13 @@ genes:
     H2AFY2: MACROH2A2
     H2AFZ: H2AZ1
 
+  ensembl_ids:
+    - ENSG00000188486  # H2AFX/H2AX
+    - ENSG00000134986  # H2AFY/MACROH2A1
+    - ENSG00000172264  # H2AFY2/MACROH2A2
+    - ENSG00000164032  # H2AFZ/H2AZ1
+
+
 #Data options
 data:
   assay_type: "unstranded"  # Which assay to use
@@ -42,13 +49,6 @@ data_categories:
   methylation: "DNA Methylation"
   mutations: "Simple Nucleotide Variation"
   cnv: "Copy Number Variation"
-
-# Visualization
-visualization:
-  heatmap_colors: "RdBu"
-  volcano_colors: ["blue", "grey", "red"]
-  figure_width: 10
-  figure_height: 8
 
 # Computational
 computational:
