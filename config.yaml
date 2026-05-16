@@ -65,6 +65,11 @@ analysis:
   log2fc_threshold: 1.0           # log2 fold change cutoff
   survival_pvalue_threshold: 0.05 # survival analysis p-value cutoff
 
+  # Batch effect correction (NEW!)
+  use_sva: true                   # Enable Surrogate Variable Analysis
+  n_surrogate_variables: null     # Number of SVs (null = auto-detect)
+
+
   # Methods
   differential_expression_method: "DESeq2"  # DESeq2, edgeR, or limma
   multiple_testing_correction: "BH"         # BH (Benjamini-Hochberg), bonferroni, or qvalue
@@ -79,13 +84,13 @@ analysis:
 output:
   base_dir: "results"
   differential_expression: "results/differential_expression"
-  survival: "results/survival"
+  survival: "resultssurvival"
   figures: "results/figures"
   tables: "results/tables"
 
 # Project metadata
 project:
-  name: "Pan-Cancer Histone Variant Analysis"
-  description: "Comparative analysis of histone variant expression and prognostic value across 15 major cancer types"
+  name: "MULTI-OMICS Histone Variant Analysis - UCEC"
+  description: " Analysis of histone variant expression and prognostic value in UCEC "
   timeline: "1-2 months"
   data_source: "TCGA via Genomic Data Commons (GDC)"

@@ -2,60 +2,88 @@
 
 library(TCGAbiolinks)
 
-extract_tcga_data <- function(project_name, data_category, force = FALSE) {
+library(TCGAbiolinks)
 
-  prepared_file <- paste0("data/processed/", project_name, "_",
-                          gsub(" ", "_", data_category), "_prepared.RData")
+download_tcga_data <- function(project_name, data_category, force = FALSE) {
 
-  if (file.exists(prepared_file) && !force) {
-    load(prepared_file)
-    return(data_result)
+  safe_category <- gsub(" ", "_", data_category)
+  query_file <- paste0("data/queries/", project_name, "_",
+                       safe_category, "_query.RData")
+
+  flag_file <- paste0("data/downloaded/", project_name, "_",
+                      safe_category, ".flag")
+
+  if (file.exists(flag_file) && !force) {
+    message("Already downloaded: ", project_name, " - ", data_category)
+    if (file.exists(query_file)) {
+      load(query_file)
+      return(query)
+    }
   }
 
-  # Transcriptome
+  message("Downloading: ", project_name, " - ", data_category)
+
+  # Create query based on data category
   if (data_category == "Transcriptome Profiling") {
-    query <- GDCquery(project = project_name,
-                      data.category = "Transcriptome Profiling",
-                      data.type = "Gene Expression Quantification",
-                      workflow.type = "STAR - Counts")
-
-    GDCdownload(query, method = "api", files.per.chunk = 10)
-
-    expr_matrix <- GDCprepare_read(query)
-    #data_result <- GDCprepare(query) # Raw
-
-    #save(data_result, file = prepared_file)
-    return(data_result)
+    query <- GDCquery(
+      project = project_name,
+      data.category = "Transcriptome Profiling",
+      data.type = "Gene Expression Quantification",
+      workflow.type = "STAR - Counts"
+    )
+  } else if (data_category == "DNA Methylation") {
+    query <- GDCquery(
+      project = project_name,
+      data.category = "DNA Methylation",
+      platform = "Illumina Human Methylation 450",
+      data.type = "Methylation Beta Value"
+    )
+  } else if (data_category == "Simple Nucleotide Variation") {
+    query <- GDCquery(
+      project = project_name,
+      data.category = "Simple Nucleotide Variation",
+      access = "open",
+      data.type = "Masked Somatic Mutation",
+      workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking"
+    )
+  } else {
+    stop("Invalid data_category: ", data_category)
   }
 
-  # Methylation
-  if (data_category == "DNA Methylation") {
-    query <- GDCquery(project = project_name,
-                      data.category = "DNA Methylation",
-                      platform = "Illumina Human Methylation 450",
-                      data.type = "Methylation Beta Value" )
+  GDCdownload(query, method = "api", files.per.chunk = 10)
 
-    GDCdownload(query, method = "api", files.per.chunk = 10)
-    data_result <- GDCprepare(query)
+  dir.create("data/queries", showWarnings = FALSE, recursive = TRUE)
+  save(query, file = query_file)
 
-    #save(data_result, file = prepared_file)
-    return(data_result)
-  }
+  dir.create("data/downloaded", showWarnings = FALSE, recursive = TRUE)
+  writeLines(as.character(Sys.time()), flag_file)
 
-  # Mutation
-  if (data_category == "Simple Nucleotide Variation") {
-    query <- GDCquery(project = project_name,
-                      data.category = "Simple Nucleotide Variation",
-                      access = "open",
-                      data.type = "Masked Somatic Mutation",
-                      workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking")
+  message("Download complete: ", project_name, " - ", data_category)
 
-    GDCdownload(query, method = "api", files.per.chunk = 10)
-    data_result <- GDCprepare(query)
+  return(query)
+}
 
-    #save(data_result, file = prepared_file)
-    return(data_result)
-  }
+
+
+# GDCprepare
+prepare_tcga_data <- function(query) {
+
+  library(TCGAbiolinks)
+  library(SummarizedExperiment)
+
+  cat("  Preparing data for analysis...\n")
+
+  data <- GDCprepare(query, summarizedExperiment = TRUE)
+
+  cat("  Data prepared:\n")
+  cat("    Samples:", ncol(data), "\n")
+  cat("    Genes:", nrow(data), "\n")
+  cat("    Assays:", paste(assayNames(data), collapse = ", "), "\n")
+
+  cat("  Sample type distribution:\n")
+  print(table(colData(data)$sample_type))
+
+  return(data)
 }
 
 

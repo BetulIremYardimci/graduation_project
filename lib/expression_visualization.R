@@ -91,12 +91,10 @@ plot_with_stats <- function(data_long, title = "Expression with Statistics") {
 plot_heatmap <- function(data_matrix, annotation_df,
                          title = "Expression Heatmap") {
 
-    data_log <- log2(data_matrix + 1)
+  # Log transform
+  data_log <- log2(data_matrix + 1)
 
-  if (is.null(rownames(data_log))) {
-    rownames(data_log) <- c("H2AFX", "H2AFY", "H2AFY2", "H2AFZ")
-  }
-
+  # Plot
   pheatmap(data_log,
            annotation_col = annotation_df,
            show_colnames = FALSE,
@@ -109,6 +107,7 @@ plot_heatmap <- function(data_matrix, annotation_df,
              sample_type = c("Tumor" = "#E74C3C", "Normal" = "#3498DB")
            ))
 }
+
 
 # Function 6: Combined Plot (Publication Quality)
 plot_combined <- function(data_long, output_file = NULL) {
@@ -187,3 +186,114 @@ export_all_plots <- function(data_long, data_matrix, annotation_df,
 
   message("✓ All plots exported to: ", output_dir)
 }
+
+#####################
+#Differential Expression
+
+plot_expression_heatmap <- function(norm_counts, sample_metadata, gene_names) {
+
+  library(pheatmap)
+
+  # Log transform
+  norm_log <- log2(norm_counts + 1)
+
+  # Gene names as rownames
+  rownames(norm_log) <- gene_names
+
+  # Sample annotation
+  annotation_col <- data.frame(
+    Type = sample_metadata$sample_type,
+    row.names = colnames(norm_log)
+  )
+
+  # Plot
+  pheatmap(norm_log,
+           annotation_col = annotation_col,
+           show_colnames = FALSE,
+           cluster_rows = TRUE,
+           cluster_cols = TRUE,
+           color = colorRampPalette(c("blue", "white", "red"))(100),
+           main = "Normalized Expression Heatmap",
+           fontsize_row = 12,
+           annotation_colors = list(
+             Type = c("Normal" = "#3498DB", "Tumor" = "#E74C3C")
+           ))
+}
+
+#-------------
+
+plot_volcano_full <- function(de_results,
+                              title = "Volcano Plot",
+                              padj_cutoff = 0.05,
+                              log2fc_cutoff = 1) {
+
+  library(ggplot2)
+
+  res_df <- de_results$results
+
+  ## classify genes
+  res_df$regulation <- "NS"
+  res_df$regulation[res_df$padj < padj_cutoff &
+                      res_df$log2FoldChange >= log2fc_cutoff] <- "Up"
+  res_df$regulation[res_df$padj < padj_cutoff &
+                      res_df$log2FoldChange <= -log2fc_cutoff] <- "Down"
+
+  res_df$regulation <- factor(
+    res_df$regulation,
+    levels = c("Up", "Down", "NS")
+  )
+
+  ggplot(res_df,
+         aes(x = log2FoldChange,
+             y = -log10(padj),
+             color = regulation)) +
+
+    ## background points
+    geom_point(data = subset(res_df, regulation == "NS"),
+               size = 1.2, alpha = 0.4) +
+
+    ## significant points
+    geom_point(data = subset(res_df, regulation != "NS"),
+               size = 1.8, alpha = 0.9) +
+
+    ## thresholds
+    geom_vline(xintercept = c(-log2fc_cutoff, log2fc_cutoff),
+               linetype = "dashed", color = "gray50") +
+    geom_hline(yintercept = -log10(padj_cutoff),
+               linetype = "dashed", color = "gray50") +
+
+    ## colors
+    scale_color_manual(
+      values = c(
+        "Up" = "#D73027",
+        "Down" = "#4575B4",
+        "NS" = "gray70"
+      )
+    ) +
+
+    ## limits (prevents extreme tails ruining scale)
+    coord_cartesian(
+      xlim = quantile(res_df$log2FoldChange, c(0.01, 0.99), na.rm = TRUE),
+      ylim = c(0, quantile(-log10(res_df$padj), 0.99, na.rm = TRUE))
+    ) +
+
+    theme_classic(base_size = 14) +
+    labs(
+      title = title,
+      x = "log2 Fold Change (Tumor vs Normal)",
+      y = expression(-log[10]("adjusted p-value")),
+      color = NULL
+    ) +
+    theme(
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      legend.position = "top",
+      axis.line = element_line(color = "black"),
+      axis.text = element_text(color = "black")
+    )
+}
+
+
+#--------------
+
+
+
