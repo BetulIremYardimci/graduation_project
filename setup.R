@@ -14,7 +14,7 @@ cat("========================================================================\n\
 r_version <- paste(R.version$major, R.version$minor, sep = ".")
 cat("R version:", r_version, "\n")
 
-if (as.numeric(R.version$major) < 4 || 
+if (as.numeric(R.version$major) < 4 ||
     (as.numeric(R.version$major) == 4 && as.numeric(R.version$minor) < 3)) {
   warning("R version 4.3.0 or higher is recommended!")
 }

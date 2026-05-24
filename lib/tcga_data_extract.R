@@ -43,8 +43,14 @@ download_tcga_data <- function(project_name, data_category, force = FALSE) {
       project = project_name,
       data.category = "Simple Nucleotide Variation",
       access = "open",
-      data.type = "Masked Somatic Mutation",
-      workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking"
+      data.type = "Masked Somatic Mutation"
+    )
+  } else if (data_category == "Copy Number Variation") {
+    query <- GDCquery(
+      project = project_name,
+      data.category = "Copy Number Variation",
+      data.type = "Gene Level Copy Number",
+      access = "open"
     )
   } else {
     stop("Invalid data_category: ", data_category)
@@ -62,8 +68,6 @@ download_tcga_data <- function(project_name, data_category, force = FALSE) {
 
   return(query)
 }
-
-
 
 # GDCprepare
 prepare_tcga_data <- function(query) {
