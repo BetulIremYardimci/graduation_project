@@ -8,3 +8,10 @@ repo.Rproj
 data/
 old_mains/
 old/
+.RData
+*.png
+/lib
+/.Rhistory
+*.pdf
+*.jpeg
+figures/
